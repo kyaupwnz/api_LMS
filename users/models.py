@@ -37,7 +37,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, verbose_name='Почта')
     phone_number = models.CharField(unique=True, max_length=15, verbose_name='Номер телефона', **NULLABLE)
     city = models.CharField(max_length=50, verbose_name='Страна')
-    avatar = models.ImageField(upload_to='users/', verbose_name='Аватар')
+    avatar = models.ImageField(upload_to='users/', verbose_name='Аватар', **NULLABLE)
     objects = CustomUserManager()
 
     class Meta:
