@@ -2,16 +2,14 @@ from django.shortcuts import render
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 
-from education.models import Course, Lesson
+from education.models import Course, Lesson, Payments
 from education.permissions import IsManager, IsModerator
-from education.serializers import CourseSerializer, LessonSerializer
+from education.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer
 
-
-
-# Create your views here.
 
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
+    queryset = Course.objects.all()
 
     def get_permissions(self):
         if self.action == 'create':
@@ -28,12 +26,12 @@ class CourseViewSet(viewsets.ModelViewSet):
             permission_classes = [IsManager]
         return [permission() for permission in permission_classes]
 
-    def get_queryset(self):
-        if self.request.user.has_perm('education.view_course'):
-            return Course.objects.all()
-        else:
-            paid_courses = self.request.user.payments_set.values_list('course_id')
-            return Course.objects.filter(pk__in=paid_courses)
+    # def get_queryset(self):
+    #     if self.request.user.has_perm('education.view_course'):
+    #         return Course.objects.all()
+    #     else:
+    #         paid_courses = self.request.user.payments_set.values_list('course_id')
+    #         return Course.objects.filter(pk__in=paid_courses)
 
 
 class LessonListView(generics.ListAPIView):
@@ -76,3 +74,27 @@ class LessonDestroyApiView(generics.DestroyAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsManager]
+
+
+class PaymentsListAPIView(generics.ListAPIView):
+    serializer_class = PaymentsSerializer
+    queryset = Payments.objects.all()
+    permission_classes = [IsAuthenticated]
+
+
+class PaymentsCreateApiView(generics.CreateAPIView):
+    serializer_class = PaymentsSerializer
+    queryset = Payments.objects.all()
+    permission_classes = [IsAuthenticated]
+
+
+class PaymentsUpdateAPIView(generics.UpdateAPIView):
+    serializer_class = PaymentsSerializer
+    queryset = Payments.objects.all()
+    permission_classes = [IsAuthenticated, IsModerator]
+
+    def perform_update(self, serializer):
+        if serializer.subscription.status:
+            serializer.subscription.save(status=False)
+        else:
+            serializer.subscription.save(status=True)
