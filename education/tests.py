@@ -1,7 +1,9 @@
 from django.contrib.auth.models import Permission
 from rest_framework.test import APITestCase
 from rest_framework import status
+from django.test.client import MULTIPART_CONTENT, encode_multipart, BOUNDARY
 
+from education.models import Course
 from users.models import User
 
 
@@ -43,13 +45,13 @@ class CourseTestCase(APITestCase):
         }
         self.test_response_data = {
             "id": 1,
-            "title": "Второй курс",
-            "description": "Очень важный курс",
+            "title": "Первый курс",
+            "description": "Интересный курс",
             "lesson": [
                 {
                     "id": 1,
-                    "title": "Первый урок второго курса",
-                    "description": "Описание первого урока второго курса",
+                    "title": "первый урок",
+                    "description": "описание урока",
                     "video_url": "https://youtube.com"
                 }
             ],
@@ -141,9 +143,38 @@ class PaymentsTestCase(APITestCase):
         self.user = User(email='test@test.ru', is_active=True)
         self.user.set_password('testuser')
         self.user.save()
+        permission = Permission.objects.get(name='Can add Курс')
+        self.user.user_permissions.add(permission)
+        permission = Permission.objects.get(name='Can delete Курс')
+        self.user.user_permissions.add(permission)
+        permission = Permission.objects.get(name='Can view Курс')
+        self.user.user_permissions.add(permission)
+        permission = Permission.objects.get(name='Can change Курс')
+        self.user.user_permissions.add(permission)
+        permission = Permission.objects.get(name='Can add Урок')
+        self.user.user_permissions.add(permission)
+        permission = Permission.objects.get(name='Can delete Урок')
+        self.user.user_permissions.add(permission)
+        permission = Permission.objects.get(name='Can view Урок')
+        self.user.user_permissions.add(permission)
+        permission = Permission.objects.get(name='Can change Урок')
+        self.user.user_permissions.add(permission)
+        self.user.save()
         response = self.client.post("/users/api/token/", {'email': 'test@test.ru', 'password': 'testuser'})
         self.access_token = response.json().get("access")
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
+        course_data =   {
+                "title": "Первый курс",
+                "description": "Интересный курс",
+                "lesson": [
+                    {
+                        "title": "первый урок",
+                        "description": "описание урока",
+                        "video_url": "https://youtube.com"
+                    }
+                ]
+            }
+        self.course = Course.objects.get_or_create(course_data)
 
         self.test_data = {
             "payment_sum": 15000,
@@ -153,7 +184,7 @@ class PaymentsTestCase(APITestCase):
             "id": 1,
             "user": "test@test.ru",
             "subs_status": True,
-            "payment_date": "2023-03-08",
+            "payment_date": "2023-03-09",
             "payment_sum": 15000,
             "payment_type": "cash",
             "course": 1,
@@ -167,13 +198,14 @@ class PaymentsTestCase(APITestCase):
 
     def test_payments_update(self):
         self.test_payments_create()
-        response = self.client.patch('/education/payments/1/')
+        response = self.client.patch('/education/payments/update/1/')
+        print(response.json)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         updated_data = {
             "id": 1,
             "user": "test@test.ru",
             "subs_status": False,
-            "payment_date": "2023-03-08",
+            "payment_date": "2023-03-09",
             "payment_sum": 15000,
             "payment_type": "cash",
             "course": 1,
