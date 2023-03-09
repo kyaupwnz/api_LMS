@@ -1,7 +1,6 @@
 from django.contrib.auth.models import Permission
 from rest_framework.test import APITestCase
 from rest_framework import status
-from django.test.client import MULTIPART_CONTENT, encode_multipart, BOUNDARY
 
 from education.models import Course
 from users.models import User
