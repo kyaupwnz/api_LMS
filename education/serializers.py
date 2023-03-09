@@ -24,16 +24,11 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         model = Subscription
         fields = '__all__'
 
-    # def create(self, validated_data):
-    #     new_subscription = Subscription.objects.create(**validated_data)
-    #     return new_subscription
-
 
 class CourseSerializer(serializers.ModelSerializer):
     lesson_count = serializers.SerializerMethodField()
     lesson = LessonSerializer(source='lesson_set', many=True)
     subs_status = serializers.SerializerMethodField()
-    # subs_status = SubscriptionSerializer(source='subscription_set', many=True)
 
     class Meta:
         model = Course
@@ -60,13 +55,16 @@ class CourseSerializer(serializers.ModelSerializer):
         return 0
 
     def get_subs_status(self, instance):
-        return SubscriptionSerializer(instance.payments_set.filter(user_id=self.context.get("user_id")).last().subscription_set.filter().status, many=True)
-
-#self.context['request'].user.id
+        user = self.context['request'].user.id
+        obj = Payments.objects.filter(course=instance).filter(user=user)
+        if obj:
+            return obj.first().subscription_set.first().status
+        return False
 
 
 class PaymentsSerializer(serializers.ModelSerializer):
     user = serializers.CharField(default=serializers.CurrentUserDefault())
+    subs_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Payments
@@ -77,3 +75,8 @@ class PaymentsSerializer(serializers.ModelSerializer):
         Subscription.objects.create(payment=new_payment)
         return new_payment
 
+    def get_subs_status(self, instance):
+        if subscription := Subscription.objects.filter(payment=instance):
+            return subscription.first().status
+        else:
+            return None

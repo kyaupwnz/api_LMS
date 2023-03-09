@@ -2,14 +2,15 @@ from django.shortcuts import render
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 
-from education.models import Course, Lesson, Payments
+from education.models import Course, Lesson, Payments, Subscription
 from education.permissions import IsManager, IsModerator
-from education.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer
+from education.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
+
 
     def get_permissions(self):
         if self.action == 'create':
@@ -91,10 +92,21 @@ class PaymentsCreateApiView(generics.CreateAPIView):
 class PaymentsUpdateAPIView(generics.UpdateAPIView):
     serializer_class = PaymentsSerializer
     queryset = Payments.objects.all()
-    permission_classes = [IsAuthenticated, IsModerator]
+    permission_classes = [IsAuthenticated, IsModerator, IsManager]
 
     def perform_update(self, serializer):
-        if serializer.subscription.status:
-            serializer.subscription.save(status=False)
+        obj = Payments.objects.get(pk=self.kwargs.get('pk'))
+        sub = Subscription.objects.get(payment_id=obj)
+        if sub.status:
+            sub.status = False
+            sub.save()
         else:
-            serializer.subscription.save(status=True)
+            sub.status = True
+            sub.save()
+
+
+class PaymentsDestroyApiView(generics.DestroyAPIView):
+    serializer_class = PaymentsSerializer
+    queryset = Payments.objects.all()
+    permission_classes = [IsManager]
+

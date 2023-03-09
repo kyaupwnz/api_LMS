@@ -50,7 +50,6 @@ class Payments(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, verbose_name='Оплаченный урок', **NULLABLE)
     payment_sum = models.IntegerField(verbose_name='Сумма оплаты')
     payment_type = models.CharField(choices=PAYMENT_TYPE, max_length=20, default=CASH, verbose_name='Способ оплаты')
-    # subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, verbose_name='Подписка')
 
 
     class Meta:
