@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from education.views import CourseViewSet, LessonListView, LessonCreateApiView, LessonRetrieveApiView, \
     LessonUpdateApiView, LessonDestroyApiView, PaymentsListAPIView, PaymentsCreateApiView, PaymentsUpdateAPIView, \
-    PaymentsDestroyApiView
+    PaymentsDestroyApiView, PaymentAPIView
 
 router = DefaultRouter()
 router.register(r'course', CourseViewSet, basename='course')
@@ -19,4 +19,5 @@ urlpatterns = [
     path('payments/create/', PaymentsCreateApiView.as_view(), name='payments_create'),
     path('payments/update/<int:pk>/', PaymentsUpdateAPIView.as_view(), name='payments_update'),
     path('payments/destroy/<int:pk>/', PaymentsDestroyApiView.as_view(), name='payments_destroy'),
+    path('payment/<int:pk>/', PaymentAPIView.as_view(), name='payment_tinkoff'),
               ] + router.urls

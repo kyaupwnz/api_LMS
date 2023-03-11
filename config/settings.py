@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'users',
-    'education'
+    'education',
+    'drf_yasg'
 
 
 ]
@@ -148,3 +149,4 @@ REST_FRAMEWORK = {
     # ]
 }
 
+TERMINAL_KEY='1677659270153DEMO'
