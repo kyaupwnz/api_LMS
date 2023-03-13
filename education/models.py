@@ -57,6 +57,16 @@ class Payments(models.Model):
         verbose_name = 'Платеж'
         verbose_name_plural = 'Платежи'
 
+class PaymentLog(models.Model):
+    TerminalKey = models.CharField(max_length=100, **NULLABLE)
+    OrderId = models.CharField(max_length=100, **NULLABLE)
+    Success = models.BooleanField(default=False)
+    Status = models.CharField(max_length=50, **NULLABLE)
+    PaymentId = models.CharField(max_length=100, **NULLABLE)
+    ErrorCode = models.PositiveIntegerField(default=0, **NULLABLE)
+    Amount = models.PositiveBigIntegerField(default=0, **NULLABLE)
+    PaymentURL = models.CharField(max_length=100, **NULLABLE)
+
 
 class Subscription(models.Model):
     status = models.BooleanField(default=True)

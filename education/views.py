@@ -5,8 +5,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from education.models import Course, Lesson, Payments, Subscription
+from education.tasks import course_update_notify
+from education.models import Course, Lesson, Payments, Subscription, PaymentLog
 from education.permissions import IsManager, IsModerator
 from education.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer
 
@@ -14,6 +14,10 @@ from education.serializers import CourseSerializer, LessonSerializer, PaymentsSe
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
+
+    def perform_update(self, serializer):
+        self.object = serializer.save()
+        course_update_notify.delay(self.object.pk)
 
 
     def get_permissions(self):
@@ -162,6 +166,7 @@ class PaymentAPIView(APIView):
             'https://securepay.tinkoff.ru/v2/Init',
             json=request_data
         )
+        paymentlog = PaymentLog.objects.create(**response.json())
         return Response(response.json().get('PaymentURL'))
 
 
