@@ -57,6 +57,7 @@ class Payments(models.Model):
         verbose_name = 'Платеж'
         verbose_name_plural = 'Платежи'
 
+
 class PaymentLog(models.Model):
     TerminalKey = models.CharField(max_length=100, **NULLABLE)
     OrderId = models.CharField(max_length=100, **NULLABLE)
