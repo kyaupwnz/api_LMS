@@ -8,3 +8,10 @@
 7. Установите зависимости: pip install -r requirements.txt
 8. Выполните миграции: python3 manage.py migrate
 9. Запустите сервер: python3 manage.py runserver
+
+
+Для запуска проекта одной командой:
+1. docker-compose up -d --build
+
+Выключение:
+1. docker-compose down
