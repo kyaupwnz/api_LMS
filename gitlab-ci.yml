@@ -1,0 +1,11 @@
+stages:
+  - test
+test:
+  stage: test
+  script:
+    - cp $ENV_TEST .env
+    - python3 manage.py test
+  only:
+    - master
+  tags:
+    - test
